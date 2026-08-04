@@ -1,9 +1,8 @@
 -- =======================================================================
--- CROWS HUB (CWH) ver 8.1 - PC PREMIUM FIXED & CUSTOMIZABLE
+-- CROWS HUB (CWH) ver 8.2 - PC PREMIUM (NO-BUG VERSION)
 -- =======================================================================
 
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local InterfaceManager = loadstring(game:HttpGet("https://githubusercontent.com"))()
 
 local WS, JP, FV = 16, 50, 70
 local wsOn, jpOn, infJ, noclip, flg, fk, bp, hs, anti = false, false, false, false, false, false, false, false, false
@@ -117,33 +116,36 @@ Tabs.Troll:AddToggle("AntiAFKToggle", {
 })
 
 -- =======================================================================
--- ВКЛАДКА 4: SETTINGS & CUSTOMIZATION
+-- ВКЛАДКА 4: SETTINGS (БЕЗБАГОВАЯ КАСТОМИЗАЦИЯ ВРУЧНУЮ)
 -- =======================================================================
-Tabs.Settings:AddSection("Keybind Settings")
+Tabs.Settings:AddSection("Menu Customization")
 
--- Текстовое поле ввода для изменения кнопки открытия/закрытия хаба
-local KeyInput = Tabs.Settings:AddInput("KeybindInput", {
-    Title = "Сменить кнопку меню (На английском)",
+-- Кастомная удобная кнопка смены бинда закрытия меню
+Tabs.Settings:AddKeybind("MenuKeybind", {
+    Title = "Кнопка скрытия меню ГУИ",
+    Mode = "Toggle",
     Default = "RightShift",
-    Placeholder = "Например: LeftControl, V, X, K",
-    Numeric = false,
-    Finished = true,
     Callback = function(Value)
-        local success, key = pcall(function() return Enum.KeyCode[Value] end)
-        if success and key then
-            Window:ChangeMinimizeKey(key)
-            Fluent:Notify({
-                Title = "Crows Hub",
-                Content = "Кнопка скрытия меню успешно изменена на: " .. Value,
-                Duration = 3
-            })
-        else
-            Fluent:Notify({
-                Title = "Crows Hub Error",
-                Content = "Неверное имя клавиши! Пиши без пробелов, например: LeftControl",
-                Duration = 4
-            })
-        end
+        Window:ChangeMinimizeKey(Value)
+    end
+})
+
+-- Наша личная автономная кнопка выбора тем (без лагающих плагинов)
+local currentThemeNum = 1
+local themeList = {"Dark", "Light", "Amethyst", "Aqua"}
+local ThemeBtn = Tabs.Settings:AddButton({
+    Title = "Сменить тему UI (Клик)",
+    Description = "Текущая тема: Dark",
+    Callback = function()
+        currentThemeNum = currentThemeNum + 1
+        if currentThemeNum > #themeList then currentThemeNum = 1 end
+        local chosenTheme = themeList[currentThemeNum]
+        Window:SetTheme(chosenTheme)
+        Fluent:Notify({
+            Title = "Crows Hub Theme",
+            Content = "Тема интерфейса изменена на: " .. chosenTheme,
+            Duration = 2
+        })
     end
 })
 
@@ -159,13 +161,8 @@ Tabs.Settings:AddButton({
     end
 })
 
--- Подключаем встроенную смену тем Fluent UI
-Tabs.Settings:AddSection("Interface Theme")
-InterfaceManager:SetLibrary(Fluent)
-InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-
 -- =======================================================================
--- БРОНЕБОЙНАЯ РАБОЧАЯ ЛОГИКА
+-- ЧИСТАЯ ИЗОЛИРОВАННАЯ ПК-ЛОГИКА
 -- =======================================================================
 local P = game.Players.LocalPlayer
 
@@ -201,6 +198,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Crows Hub | PC Edition",
-    Content = "Премиум интерфейс ver 8.1 успешно инициализирован!",
+    Content = "Премиум интерфейс ver 8.2 успешно инициализирован!",
     Duration = 5
 })

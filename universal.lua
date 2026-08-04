@@ -1,28 +1,23 @@
 -- =======================================================================
--- CROWS HUB (CWH) ver 8.0 - PC FLUENT EDITION (FULLY FUNCTIONAL)
+-- CROWS HUB (CWH) ver 8.1 - PC PREMIUM FIXED & CUSTOMIZABLE
 -- =======================================================================
 
--- 1. Загрузка библиотек
 local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
-local SaveManager = loadstring(game:HttpGet("https://githubusercontent.com"))()
 local InterfaceManager = loadstring(game:HttpGet("https://githubusercontent.com"))()
 
--- 2. Твои рабочие переменные физики
 local WS, JP, FV = 16, 50, 70
 local wsOn, jpOn, infJ, noclip, flg, fk, bp, hs, anti = false, false, false, false, false, false, false, false, false
 
--- 3. Создание главного окна
 local Window = Fluent:CreateWindow({
     Title = "Crows Hub | PC Premium",
     SubTitle = "by crowshubdev",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 430),
-    Acrylic = true, -- Роскошное размытие
+    Acrylic = true,
     Theme = "Dark",
-    MinimizeKey = Enum.KeyCode.RightShift -- Скрыть GUI на правый Shift
+    MinimizeKey = Enum.KeyCode.RightShift
 })
 
--- 4. Создание вкладок (Tabs)
 local Tabs = {
     Main = Window:AddTab({ Title = "Main Mods", Icon = "user" }),
     Bypass = Window:AddTab({ Title = "Bypass & Visuals", Icon = "eye" }),
@@ -31,7 +26,7 @@ local Tabs = {
 }
 
 -- =======================================================================
--- ВКЛАДКА 1: MAIN MODS (Скорость и Прыжки)
+-- ВКЛАДКА 1: MAIN MODS
 -- =======================================================================
 Tabs.Main:AddSection("Movement Customization")
 
@@ -122,8 +117,36 @@ Tabs.Troll:AddToggle("AntiAFKToggle", {
 })
 
 -- =======================================================================
--- ВКЛАДКА 4: SETTINGS & UTILITIES
+-- ВКЛАДКА 4: SETTINGS & CUSTOMIZATION
 -- =======================================================================
+Tabs.Settings:AddSection("Keybind Settings")
+
+-- Текстовое поле ввода для изменения кнопки открытия/закрытия хаба
+local KeyInput = Tabs.Settings:AddInput("KeybindInput", {
+    Title = "Сменить кнопку меню (На английском)",
+    Default = "RightShift",
+    Placeholder = "Например: LeftControl, V, X, K",
+    Numeric = false,
+    Finished = true,
+    Callback = function(Value)
+        local success, key = pcall(function() return Enum.KeyCode[Value] end)
+        if success and key then
+            Window:ChangeMinimizeKey(key)
+            Fluent:Notify({
+                Title = "Crows Hub",
+                Content = "Кнопка скрытия меню успешно изменена на: " .. Value,
+                Duration = 3
+            })
+        else
+            Fluent:Notify({
+                Title = "Crows Hub Error",
+                Content = "Неверное имя клавиши! Пиши без пробелов, например: LeftControl",
+                Duration = 4
+            })
+        end
+    end
+})
+
 Tabs.Settings:AddSection("Utilities")
 
 Tabs.Settings:AddButton({
@@ -136,16 +159,13 @@ Tabs.Settings:AddButton({
     end
 })
 
--- Настройки Fluent систем автоматизации
-SaveManager:SetLibrary(Fluent)
+-- Подключаем встроенную смену тем Fluent UI
+Tabs.Settings:AddSection("Interface Theme")
 InterfaceManager:SetLibrary(Fluent)
-SaveManager:IgnoreThemeSettings()
-SaveManager:SetIgnoreIndexes({})
 InterfaceManager:BuildInterfaceSection(Tabs.Settings)
-SaveManager:BuildConfigSection(Tabs.Settings)
 
 -- =======================================================================
--- БРОНЕБОЙНАЯ РАБОЧАЯ ЛОГИКА (Твои потоки систем)
+-- БРОНЕБОЙНАЯ РАБОЧАЯ ЛОГИКА
 -- =======================================================================
 local P = game.Players.LocalPlayer
 
@@ -181,6 +201,6 @@ Window:SelectTab(1)
 
 Fluent:Notify({
     Title = "Crows Hub | PC Edition",
-    Content = "Премиум интерфейс успешно инициализирован!",
+    Content = "Премиум интерфейс ver 8.1 успешно инициализирован!",
     Duration = 5
 })

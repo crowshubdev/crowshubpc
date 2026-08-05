@@ -1,15 +1,16 @@
 -- =======================================================================
--- CROWS HUB (CWH) ver 8.2 - PC PREMIUM (NO-BUG VERSION)
+-- CROWS HUB (CWH) ver 8.3 - PC ELITE VISUALS (FULLY FIXED)
 -- =======================================================================
 
-local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local Fluent = loadstring(game:HttpGet("https://github.com"))()
 
 local WS, JP, FV = 16, 50, 70
 local wsOn, jpOn, infJ, noclip, flg, fk, bp, hs, anti = false, false, false, false, false, false, false, false, false
+local espOn, chamsOn = false, false
 
 local Window = Fluent:CreateWindow({
     Title = "Crows Hub | PC Premium",
-    SubTitle = "by crowshubdev",
+    SubTitle = "by crowshubdev | version 8.3",
     TabWidth = 160,
     Size = UDim2.fromOffset(580, 430),
     Acrylic = true,
@@ -54,8 +55,22 @@ Tabs.Main:AddSlider("JumpSlider", {
 })
 
 -- =======================================================================
--- ВКЛАДКА 2: BYPASS & VISUALS
+-- ВКЛАДКА 2: BYPASS & VISUALS (Твои новые Чамсы и ЕСП)
 -- =======================================================================
+Tabs.Bypass:AddSection("Visual Exploits (ESP)")
+
+Tabs.Bypass:AddToggle("EspNames", {
+    Title = "ESP Name Players (Имена сквозь стены)",
+    Default = false,
+    Callback = function(Value) espOn = Value end
+})
+
+Tabs.Bypass:AddToggle("ChamsPlayers", {
+    Title = "Chams Players (Подсветка силуэтов)",
+    Default = false,
+    Callback = function(Value) chamsOn = Value end
+})
+
 Tabs.Bypass:AddSection("Bypass Features")
 
 Tabs.Bypass:AddToggle("InfJumpToggle", {
@@ -116,36 +131,29 @@ Tabs.Troll:AddToggle("AntiAFKToggle", {
 })
 
 -- =======================================================================
--- ВКЛАДКА 4: SETTINGS (БЕЗБАГОВАЯ КАСТОМИЗАЦИЯ ВРУЧНУЮ)
+-- ВКЛАДКА 4: SETTINGS (Исправленные бинды и темы)
 -- =======================================================================
 Tabs.Settings:AddSection("Menu Customization")
 
--- Кастомная удобная кнопка смены бинда закрытия меню
 Tabs.Settings:AddKeybind("MenuKeybind", {
     Title = "Кнопка скрытия меню ГУИ",
     Mode = "Toggle",
-    Default = "RightShift",
-    Callback = function(Value)
-        Window:ChangeMinimizeKey(Value)
+    Default = Enum.KeyCode.RightShift,
+    Callback = function(Key)
+        Window:ChangeMinimizeKey(Key)
     end
 })
 
--- Наша личная автономная кнопка выбора тем (без лагающих плагинов)
 local currentThemeNum = 1
 local themeList = {"Dark", "Light", "Amethyst", "Aqua"}
-local ThemeBtn = Tabs.Settings:AddButton({
+Tabs.Settings:AddButton({
     Title = "Сменить тему UI (Клик)",
-    Description = "Текущая тема: Dark",
+    Description = "Цикличное переключение скинов оформления",
     Callback = function()
         currentThemeNum = currentThemeNum + 1
         if currentThemeNum > #themeList then currentThemeNum = 1 end
         local chosenTheme = themeList[currentThemeNum]
         Window:SetTheme(chosenTheme)
-        Fluent:Notify({
-            Title = "Crows Hub Theme",
-            Content = "Тема интерфейса изменена на: " .. chosenTheme,
-            Duration = 2
-        })
     end
 })
 
@@ -162,12 +170,76 @@ Tabs.Settings:AddButton({
 })
 
 -- =======================================================================
--- ЧИСТАЯ ИЗОЛИРОВАННАЯ ПК-ЛОГИКА
+-- СЕРВЕРНАЯ ФИЗИКА И МОЩНЫЕ ПК-ВИЗУАЛЫ
 -- =======================================================================
 local P = game.Players.LocalPlayer
 
+-- Функция для отрисовки 2D ESP имен и Chams подсветки силуэтов
+local function applyVisuals(plr)
+    if plr == P then return end
+    
+    local function createVisuals(char)
+        local head = char:WaitForChild("Head", 5)
+        local hrp = char:WaitForChild("HumanoidRootPart", 5)
+        if not head or not hrp then return end
+        
+        -- Создание 2D ESP текста над головой
+        if not head:FindFirstChild("CWH_NameESP") then
+            local bb = Instance.new("BillboardGui")
+            bb.Name = "CWH_NameESP"
+            bb.Size = UDim2.new(0, 100, 0, 30)
+            bb.AlwaysOnTop = true
+            bb.ExtentsOffset = Vector3.new(0, 3, 0)
+            
+            local tl = Instance.new("TextLabel")
+            tl.Size = UDim2.new(1, 0, 1, 0)
+            tl.BackgroundTransparency = 1
+            tl.Text = plr.Name
+            tl.TextColor3 = Color3.fromRGB(255, 255, 255)
+            tl.Font = Enum.Font.SourceSansBold
+            tl.TextSize = 14
+            tl.TextStrokeTransparency = 0
+            tl.Parent = bb
+            bb.Parent = head
+        end
+        
+        -- Создание неоновой подсветки силуэта (Chams)
+        if not char:FindFirstChild("CWH_Chams") then
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "CWH_Chams"
+            highlight.FillColor = Color3.fromRGB(0, 120, 255)
+            highlight.FillTransparency = 0.5
+            highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+            highlight.OutlineTransparency = 0
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = char
+        end
+    end
+    
+    plr.CharacterAdded:Connect(createVisuals)
+    if plr.Character then createVisuals(plr.Character) end
+end
+
+-- Мониторинг игроков для ESP
+for _, player in pairs(game.Players:GetPlayers()) do applyVisuals(player) end
+game.Players.PlayerAdded:Connect(applyVisuals)
+
+-- Постоянный цикл обновления видимости визуалов и физики персонажа
 game:GetService("RunService").Stepped:Connect(function()
     pcall(function()
+        -- Контроль ESP и Chams на ходу
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character then
+                local char = player.Character
+                local esp = char:FindFirstChild("Head") and char.Head:FindFirstChild("CWH_NameESP")
+                local chams = char:FindFirstChild("CWH_Chams")
+                
+                if esp then esp.Enabled = espOn end
+                if chams then chams.Enabled = chamsOn end
+            end
+        end
+        
+        -- Базовая физика
         if P.Character and P.Character:FindFirstChildOfClass("Humanoid") then
             local h = P.Character:FindFirstChildOfClass("Humanoid")
             if wsOn then h.WalkSpeed = WS else h.WalkSpeed = 16 end
@@ -191,13 +263,4 @@ end)
 game:GetService("UserInputService").JumpRequest:Connect(function() 
     if infJ and P.Character and P.Character:FindFirstChildOfClass("Humanoid") then P.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end 
 end)
-
-task.spawn(function() while task.wait(60) do if anti and P.Character and P.Character:FindFirstChildOfClass("Humanoid") then pcall(function() P.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end) end end end)
-
-Window:SelectTab(1)
-
-Fluent:Notify({
-    Title = "Crows Hub | PC Edition",
-    Content = "Премиум интерфейс ver 8.2 успешно инициализирован!",
-    Duration = 5
-})
+task.spawn(function() while task.wait(60) do if anti and P.Character and P.Character:FindFirstChildOfClass("Humanoid") then pcall(function() P.Character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping) end) end end end)Window:SelectTab(1)Fluent:Notify({Title = "Crows Hub | PC Edition",Content = "Премиум интерфейс ver 8.3 полностью инициализирован!",Duration = 5})
